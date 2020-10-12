@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import static com.kava.market.api.domain.User.Item;
+
 @RequiredArgsConstructor
 @Service
 public class UserService {
@@ -18,5 +20,9 @@ public class UserService {
 
     public Mono<User> saveUser(User user) {
         return userRepository.save(user);
+    }
+
+    public Mono<User> createItem(String id, Item item) {
+        return userRepository.saveItem(id, item);
     }
 }
