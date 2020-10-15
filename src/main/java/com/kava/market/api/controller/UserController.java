@@ -1,41 +1,69 @@
 package com.kava.market.api.controller;
 
 import com.kava.market.api.domain.User;
+import com.kava.market.api.domain.User.Item;
+import com.kava.market.api.service.ItemService;
 import com.kava.market.api.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.reactive.function.server.RouterFunction;
-import org.springframework.web.reactive.function.server.ServerRequest;
-import org.springframework.web.reactive.function.server.ServerResponse;
+import lombok.Value;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import static org.springframework.web.reactive.function.server.RouterFunctions.route;
-
-@Configuration
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("api")
+@Slf4j
 public class UserController {
 
     private final UserService userService;
+    private final ItemService itemService;
 
-    @Bean
-    public RouterFunction<ServerResponse> userRoutes() {
-        return route()
-                .GET("/users/{id}", this::getUser)
-                .POST("/users", this::createUser)
-//                .DELETE("/users/{id}", this::deleteUser)
-                .build();
+    @GetMapping("users/{id}")
+    public Mono<User> getUser(@PathVariable String id) {
+        return userService.getUser(id);
     }
 
-    private Mono<ServerResponse> getUser(ServerRequest serverRequest) {
-        return userService.getUser(serverRequest.pathVariable("id"))
-                .flatMap(user -> ServerResponse.ok().body(user, User.class));
+    @PostMapping("users")
+    public Mono<User> createUser(@Validated @RequestBody User user) {
+        return userService.saveUser(user);
     }
 
-    private Mono<ServerResponse> createUser(ServerRequest serverRequest) {
-        return serverRequest.bodyToMono(User.class)
-                .flatMap(userService::saveUser)
-                .flatMap(user -> ServerResponse.ok().build());
+    @PostMapping("users/{id}/item")
+    public Mono<User> createUserItem(@PathVariable String id, @Validated @RequestBody Item item) {
+        return userService.createItem(id, item);
+    }
+
+    @GetMapping("items")
+    public Flux<Item> getItems(
+            @RequestParam(required = false) String school,
+            @RequestParam(required = false) User.Type type,
+            @RequestParam(required = false) User.Subject subject,
+            @RequestParam(required = false) String course
+    ) {
+        return itemService.findItems(school, type, subject, course);
+    }
+
+    @GetMapping("items/{id}")
+    public Mono<Item> getItem(@PathVariable String id) {
+        return itemService.findItem(id);
+    }
+
+    @DeleteMapping("items/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public Mono<User> deleteItem(@PathVariable String id) {
+        return itemService.deleteItem(id);
     }
 
 }
