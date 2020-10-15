@@ -6,7 +6,7 @@ import reactor.core.publisher.Mono;
 
 public interface UserRepository extends ReactiveMongoRepository<User, String>, ItemOperations<User, String> {
 
-    Flux<User> findBySchoolName(String schoolName);
+    Flux<User> findBySchool(String schoolName);
 
     Mono<User> findByItems_Id(String id);
 }

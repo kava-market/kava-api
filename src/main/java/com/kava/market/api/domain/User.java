@@ -28,7 +28,8 @@ public class User {
 
     String lastName;
 
-    String schoolName;
+    @Indexed
+    String school;
 
     String email;
 
@@ -49,12 +50,16 @@ public class User {
 
         String title;
 
+        @Indexed
         BigDecimal price;
 
+        @Indexed
         Type type;
 
+        @Indexed
         Subject subject;
 
+        @Indexed
         String course;
 
         String description;

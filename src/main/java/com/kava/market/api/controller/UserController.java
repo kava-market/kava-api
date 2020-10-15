@@ -1,13 +1,17 @@
 package com.kava.market.api.controller;
 
+import com.google.common.collect.ImmutableMap;
 import com.kava.market.api.domain.User;
 import com.kava.market.api.domain.User.Item;
+import com.kava.market.api.model.ItemDto;
 import com.kava.market.api.service.ItemService;
 import com.kava.market.api.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,13 +50,33 @@ public class UserController {
     }
 
     @GetMapping("items")
-    public Flux<Item> getItems(
+    public Flux<ItemDto> getItems(
             @RequestParam(required = false) String school,
             @RequestParam(required = false) User.Type type,
             @RequestParam(required = false) User.Subject subject,
             @RequestParam(required = false) String course
     ) {
-        return itemService.findItems(school, type, subject, course);
+        val params = new CustomImmutableMapBuilder<String, Object>()
+                .putIfValNotNull("school", school)
+                .putIfValNotNull("items.type", type)
+                .putIfValNotNull("items.subject", subject)
+                .putIfValNotNull("items.course", course)
+                .build();
+        return itemService.findItems(params);
+    }
+
+    public static class CustomImmutableMapBuilder<K, V> extends ImmutableMap.Builder<K, V> {
+
+        public CustomImmutableMapBuilder<K, V> putIfValNotNull(K key, V val) {
+            if (val != null) super.put(key, val);
+            return this;
+        }
+
+        @Override
+        public CustomImmutableMapBuilder<K, V> put(@NonNull K key, @NonNull V val) {
+            super.put(key, val);
+            return this;
+        }
     }
 
     @GetMapping("items/{id}")
