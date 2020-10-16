@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api")
@@ -34,13 +37,20 @@ public class UserController {
     private final UserService userService;
     private final ItemService itemService;
 
+    // TODO
+    @GetMapping("users")
+    public Mono<User> getUserOauth(@AuthenticationPrincipal OAuth2User principal) {
+        // TO BE IMPLEMENTED: return userService.saveUserByOAuthAttribute();
+        return Mono.empty();
+    }
+
     @GetMapping("users/{id}")
     public Mono<User> getUser(@PathVariable String id) {
         return userService.getUser(id);
     }
 
     @PostMapping("users")
-    public Mono<User> createUser(@Validated @RequestBody User user) {
+    public Mono<User> createUser(@Validated @RequestBody User user, @AuthenticationPrincipal OAuth2User principal) {
         return userService.saveUser(user);
     }
 
