@@ -3,3 +3,15 @@ spring:
     mongodb:
       uri: mongodb://localhost:27017
       database: test
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: google-id
+            client-secret: google-secret
+
+management:
+  endpoints:
+    web:
+      base-path: /
